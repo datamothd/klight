@@ -22,19 +22,18 @@ impl AudioState {
     pub fn play_file(&mut self, path: String) -> Result<(), String> {
         let file = File::open(&path)
             .map_err(|e| format!("Could not open file: {e}"))?;
+        let source = Decoder::try_from(file)
+            .map_err(|e| format!("Could not decode audio: {e}"))?;
 
-    let source = Decoder::try_from(file)
-        .map_err(|e| format!("Could not decode audio: {e}"))?;
+        self.duration = source
+            .total_duration()
+            .map(|duration| duration.as_secs_f32());
 
-    self.duration = source
-        .total_duration()
-        .map(|duration| duration.as_secs_f32());
-
-    self.player.stop();
-    self.player.append(source);
-    self.player.play();
-    Ok(())
-    }
+        self.player.stop();
+        self.player.append(source);
+        self.player.play();
+        Ok(())
+        }
     pub fn set_volume(&self, volume: f32) {
         self.player.set_volume(volume);
     }

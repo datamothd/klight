@@ -86,26 +86,31 @@
       currentPosition = position;
       sliderPosition = position;
       duration = trackDuration ?? 0;
+      if (duration > 0 && position >= duration - 0.25) {
+        isPaused = true;
+      }
     };
     const interval = window.setInterval(updatePlaybackInfo, 250);
     return () => window.clearInterval(interval);
   });
 </script>
 
-<main class="container">
-  <p>{isPaused ? "Paused" : "Playing"}: {fileName || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
+<main>
+  <p class="status">{isPaused ? "Paused" : "Playing"}: {fileName || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
 
-  {#if artwork}
-    <img class="artwork" src={artwork} alt="Album Artwork" />
-  {:else}
-    <picture>
-      <source
-        media="(prefers-color-scheme: light)"
-        srcset={defaultArtworki}
-      />
-      <img class="artwork" src={defaultArtwork} alt="Default Artwork" />
-    </picture>
-  {/if}
+  <div class="artworkFrame">
+    {#if artwork}
+      <img class="artwork" src={artwork} alt="Album Artwork" />
+    {:else}
+      <picture>
+        <source
+          media="(prefers-color-scheme: light)"
+          srcset={defaultArtworki}
+        />
+        <img class="artwork" src={defaultArtwork} alt="Default Artwork" />
+      </picture>
+    {/if}
+  </div>
 
   <div class="row"><button onclick={audioSelect}>Select Audio</button></div>
   <div class="row"><button onclick={togglePause}>Toggle Pause</button></div>
@@ -137,6 +142,22 @@
     color: #FFFFFF;
     font-family: "Montserrat", sans-serif;
     user-select: none;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .status {
+    min-height: 1.5em;
+  }
+  .artworkFrame {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 7px;
   }
   .volumeSlider {
     accent-color: #FFFFFF;
