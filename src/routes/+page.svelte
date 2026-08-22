@@ -96,7 +96,7 @@
 </script>
 
 <main>
-  <p class="status">{isPaused ? "Paused" : "Playing"}: {fileName || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
+  <p class="status">{isPaused ? "Paused" : "Playing"}: {fileName || "None"} <span class="green">{#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</span></p>
 
   <div class="artworkFrame">
     {#if artwork}
@@ -150,6 +150,9 @@
     text-align: center;
     width: 100%;
     box-sizing: border-box;
+  }
+  .green {
+    color: rgb(0, 189, 0);
   }
   .status {
     min-height: 1.5em;
