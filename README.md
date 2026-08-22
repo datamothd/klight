@@ -1,7 +1,22 @@
-# Tauri + SvelteKit + TypeScript
+Currently an extremely simple but fast desktop audio player. Made with Tauri, Svelte, and Rust.
+Uses Rodio for audio playback, Lofty for metadata, and Base64 for artwork display.
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
+## Current Features:
+- Artwork display
+- Audio selection
+- Play/pause
+- Volume
+- Sample rate & bit depth display
 
-## Recommended IDE Setup
+## Planned Features:
+- Seek bar
+- Playlists
+- Queues
+- Settings
+- Full metadata display using Lofty
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+```bash
+git clone https://github.com/datamothd/klight.git
+cd klight
+npm install
+npm run tauri dev
