@@ -3,6 +3,7 @@
   import { open } from "@tauri-apps/plugin-dialog";
 
   import defaultArtwork from "../klight.png";
+  import defaultArtworki from "../klight_i.png";
 
   let artwork: string | null = null;
   let isPaused = true;
@@ -37,23 +38,45 @@
   }
 </script>
 
-<main>
+<main class="container">
   <p>{isPaused ? "Paused" : "Playing"}: {currentlyPlaying || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
   {#if artwork}
     <img class="artwork" src={artwork} alt="Album Artwork" />
   {:else}
-    <img class="artwork" src={defaultArtwork} alt="Default Artwork" />
+    <picture>
+      <source
+        media="(prefers-color-scheme: light)"
+        srcset={defaultArtworki}
+      />
+      <img class="artwork" src={defaultArtwork} alt="Default Artwork" />
+    </picture>
   {/if}
 
   <div class="row"><button onclick={audioSelect}>Select Audio</button></div>
   <div class="row"><button onclick={togglePause}>Toggle Pause</button></div>
-  <p>Volume: {currentVolume}</p><input type="range" min="0" max="100" value={currentVolume} oninput={setVolume}>
+  <p>Volume: {currentVolume}</p><input class="volumeSlider" type="range" min="0" max="100" value={currentVolume} oninput={setVolume}>
 </main>
-
 <style>
+  :root {
+    background-color: #000000;
+    color: #FFFFFF;
+    user-select: none;
+  }
+  .volumeSlider {
+    accent-color: #FFFFFF;
+  }
   .artwork {
     image-rendering: pixelated;
     width: 300px;
     height: 300px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      background-color: #FFFFFF;
+      color: #000000;
+    }
+    .volumeSlider {
+      accent-color: #000000;
+    }
   }
 </style>
