@@ -2,6 +2,8 @@
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
 
+  import '@fontsource/montserrat/400.css';
+
   import defaultArtwork from "../klight.png";
   import defaultArtworki from "../klight_i.png";
 
@@ -11,6 +13,7 @@
   let currentVolume = 100;
   let sampleRate: number | null = null;
   let bitDepth: number | null = null;
+  let fileName = '';
 
   async function audioSelect() {
     const file = await open({
@@ -21,9 +24,12 @@
       return;
     }
     await invoke("play_audio", { path: file });
+
     artwork = await invoke<string | null>("get_artwork", { path: file });
     sampleRate = await invoke<number | null>("get_sample_rate", { path: file });
     bitDepth = await invoke<number | null>("get_bit_depth", { path: file });
+
+    fileName = file.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, '') ?? '';
 
     currentlyPlaying = file;
     isPaused = false;
@@ -39,7 +45,7 @@
 </script>
 
 <main class="container">
-  <p>{isPaused ? "Paused" : "Playing"}: {currentlyPlaying || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
+  <p>{isPaused ? "Paused" : "Playing"}: {fileName || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
   {#if artwork}
     <img class="artwork" src={artwork} alt="Album Artwork" />
   {:else}
@@ -60,6 +66,7 @@
   :root {
     background-color: #000000;
     color: #FFFFFF;
+    font-family: "Montserrat", sans-serif;
     user-select: none;
   }
   .volumeSlider {
