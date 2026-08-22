@@ -1,5 +1,4 @@
-Currently an extremely simple, but fast desktop audio player. <br>
-Made with Tauri, Svelte, and Rust. <br>
+Currently an extremely simple, but fast desktop audio player made with Tauri, Svelte, and Rust. <br>
 Uses Rodio for audio playback, Lofty for metadata, and Base64 for image re-encoding.
 
 ## Current Features:
@@ -8,9 +7,9 @@ Uses Rodio for audio playback, Lofty for metadata, and Base64 for image re-encod
 - Play/pause
 - Volume
 - Sample rate & bit depth display
+- Seek bar
 
 ## Planned Features:
-- Seek bar
 - Playlists
 - Queues
 - Settings

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
 
@@ -7,13 +8,27 @@
   import defaultArtwork from "../klight.png";
   import defaultArtworki from "../klight_i.png";
 
-  let artwork: string | null = null;
   let isPaused = true;
-  let currentlyPlaying = "None";
-  let currentVolume = 100;
+  let isSeeking = false;
+  let artwork: string | null = null;
   let sampleRate: number | null = null;
   let bitDepth: number | null = null;
   let fileName = '';
+  let currentVolume = 100;
+  let currentPosition = 0;
+  let sliderPosition = 0;
+  let duration = 0;
+  
+  const formatTime = (seconds: number) => {
+    const totalSeconds = Math.max(0, Math.floor(seconds));
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  };
+
+  const getSeekBarWidth = (trackDuration: number) =>
+    Math.min(600, Math.max(300, 300 + trackDuration / 2));
 
   async function audioSelect() {
     const file = await open({
@@ -31,7 +46,10 @@
 
     fileName = file.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, '') ?? '';
 
-    currentlyPlaying = file;
+    const [position, trackDuration] = await invoke<[number, number | null]>("get_playback_info");
+    currentPosition = position;
+    sliderPosition = position;
+    duration = trackDuration ?? 0;
     isPaused = false;
   }
   async function togglePause() {
@@ -42,10 +60,41 @@
     const volume = currentVolume / 100;
     await invoke("set_volume", { volume });
   }
+  async function seekAudio(position: number) {
+    await invoke('seek_audio', {
+      position
+    });
+    currentPosition = position;
+  }
+  async function handleSeekInput(event: Event) {
+    isSeeking = true;
+    sliderPosition = Number((event.currentTarget as HTMLInputElement).value);
+  }
+  async function finishSeeking() {
+    await seekAudio(sliderPosition);
+    if (isPaused) {
+      isPaused = await invoke<boolean>('toggle_pause');
+    }
+    isSeeking = false;
+  }
+
+  onMount(() => {
+    const updatePlaybackInfo = async () => {
+      if (isSeeking) return;
+
+      const [position, trackDuration] = await invoke<[number, number | null]>("get_playback_info");
+      currentPosition = position;
+      sliderPosition = position;
+      duration = trackDuration ?? 0;
+    };
+    const interval = window.setInterval(updatePlaybackInfo, 250);
+    return () => window.clearInterval(interval);
+  });
 </script>
 
 <main class="container">
   <p>{isPaused ? "Paused" : "Playing"}: {fileName || "None"} {#if sampleRate && bitDepth} @ {sampleRate} Hz / {bitDepth} bits{/if}</p>
+
   {#if artwork}
     <img class="artwork" src={artwork} alt="Album Artwork" />
   {:else}
@@ -60,7 +109,27 @@
 
   <div class="row"><button onclick={audioSelect}>Select Audio</button></div>
   <div class="row"><button onclick={togglePause}>Toggle Pause</button></div>
-  <p>Volume: {currentVolume}</p><input class="volumeSlider" type="range" min="0" max="100" value={currentVolume} oninput={setVolume}>
+  <input
+    class="seekBar"
+    type="range"
+    min="0"
+    max={duration}
+    step="0.1"
+    value={isSeeking ? sliderPosition : currentPosition}
+    oninput={handleSeekInput}
+    onchange={finishSeeking}
+    style={`width: min(90vw, ${getSeekBarWidth(duration)}px)`}
+  />
+  <p>{formatTime(currentPosition)} / {formatTime(duration)}</p>
+  <p>Volume: {currentVolume}</p>
+  <input
+    class="volumeSlider"
+    type="range"
+    min="0" 
+    max="100"
+    value={currentVolume} 
+    oninput={setVolume}
+  />
 </main>
 <style>
   :root {
@@ -72,10 +141,16 @@
   .volumeSlider {
     accent-color: #FFFFFF;
   }
+  .seekBar {
+    margin-top: 10px;
+    max-width: 90vw;
+    accent-color: #FFFFFF
+  }
   .artwork {
     image-rendering: pixelated;
     width: 300px;
     height: 300px;
+    margin-bottom: 7px;
   }
   @media (prefers-color-scheme: light) {
     :root {
@@ -83,6 +158,9 @@
       color: #000000;
     }
     .volumeSlider {
+      accent-color: #000000;
+    }
+    .seekBar {
       accent-color: #000000;
     }
   }
