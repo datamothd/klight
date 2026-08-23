@@ -19,4 +19,12 @@ Uses Rodio for audio playback, Lofty for metadata, and Base64 for image re-encod
 git clone https://github.com/datamothd/klight.git
 cd klight
 npm install
+```
+Development:
+```bash
 npm run tauri dev
+```
+Building:
+```bash
+npm run tauri build
+```
